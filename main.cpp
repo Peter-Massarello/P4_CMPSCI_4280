@@ -1,6 +1,7 @@
 #include "scanner.hpp"
 #include "parser.hpp"
 #include "semantics.hpp"
+#include "generator.hpp"
 
 using namespace std;
 
@@ -12,10 +13,12 @@ int main(int argc, char** argv){
         tokens = createTokenVector();
         tree = parse(tokens);
         staticSemantics(tree);
+        test();
     } else if (argc == 2) { 
         tokens = createTokenVector(argv[1]);
         tree = parse(tokens);
         staticSemantics(tree);
+        test();
     } else cout << "ERROR: Too many args given, existing...\n";
 
     freeTokenVector(tokens);

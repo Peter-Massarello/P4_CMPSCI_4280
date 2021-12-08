@@ -16,3 +16,18 @@ void branchToNextNonTerminal(Node* &tree, int variableCount);
 void pushLocalsToStack(Node* &tree, int &localVarCount);
 
 void generateASSIGN(Node* &tree, int variableCount);
+
+void generateOUT(Node* &tree, int variableCount);
+
+void generateEXPRESSION(Node* &tree, int variableCount);
+
+void generateN(Node* &tree, int variableCount);
+
+void generateA(Node* &tree, int variableCount);
+
+void generateM(Node* &tree, int variableCount);
+
+void generateR(Node* &tree, int variableCount);
+
+int checkIfLocal(string passedVariable);
+

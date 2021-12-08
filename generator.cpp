@@ -16,6 +16,7 @@ void driver(Node* &tree, string fileName) {
     for (int i = 0; i < globalOffsetForStack; i++){
         outputFile << variableStack.at(i) << " 0" << endl;
     }
+    outputFile << "TEMP 0" << endl;
 
     outputFile.close();
 }
@@ -28,9 +29,44 @@ void generate(Node* &tree, int variableCount){
         pushLocalsToStack(tree->child1, localVars);
         generate(tree->child2, localVars);
     } else {
-        branchToNextNonTerminal(tree->child1, variableCount);
+        branchToNextNonTerminal(tree, variableCount);
     }
 
+}
+
+void generateOUT(Node* &tree, int variableCount) {
+    cout << "found out" << endl;
+    generate(tree->child1, variableCount);
+
+    outputFile << "STORE TEMP" << endl;
+    outputFile << "WRITE TEMP" << endl;
+}
+
+void generateEXPRESSION(Node* &tree, int variableCount) {
+    cout << "found Expr" << endl;
+    generate(tree->child1, variableCount);
+
+}
+
+void generateN(Node* &tree, int variableCount) {
+    cout << "found N" << endl;
+    generate(tree->child1, variableCount);
+
+}
+
+void generateA(Node* &tree, int variableCount) {
+    cout << "found A" << endl;
+    generate(tree->child1, variableCount);
+}
+
+void generateM(Node* &tree, int variableCount) {
+    cout << "found M" << endl;
+    generate(tree->child1, variableCount);
+}
+
+void generateR(Node* &tree, int variableCount) {
+    cout << "found r" << endl;
+    outputFile << "LOAD " << tree->tk1->token << endl;
 }
 
 void pushLocalsToStack(Node* &tree, int &localVariableCount) {
@@ -51,7 +87,12 @@ void branchToNextNonTerminal(Node* &tree, int variableCount) {
     string nodeType = tree->nodeType;
     
     if (nodeType == "<ASSIGN>") { cout << "Found assign" << endl;}
-    else if (nodeType == "<EXPRESSION>") { cout << "Found expression" << endl;}
+    else if (nodeType == "<OUT>") { generateOUT(tree, variableCount);}
+    else if (nodeType == "<EXPRESSION>") { generateEXPRESSION(tree, variableCount);}
+    else if (nodeType == "<N>") { generateN(tree, variableCount);}
+    else if (nodeType == "<A>") { generateA(tree, variableCount);}
+    else if (nodeType == "<M>") { generateM(tree, variableCount);}
+    else if (nodeType == "<R>") { generateR(tree, variableCount);}
     else {
         if (tree->child1 != NULL) branchToNextNonTerminal(tree->child1, variableCount);
         if (tree->child2 != NULL) branchToNextNonTerminal(tree->child2, variableCount);
@@ -71,6 +112,20 @@ void addGlobals(Node* &tree) {
     }
 
     if (tree->child1 != NULL) addGlobals(tree->child1);
+}
+
+int checkIfLocal(string passedVariable) {
+    for (int i = variableStack.size(); i >= globalOffsetForStack; i--)
+    {
+        if (variableStack.at(i) == passedVariable) {
+            cout << "found local" << endl;
+            return variableStack.size() - i;
+        } else {
+            cout << "is a global" << endl;
+            return -1;
+        }
+    }
+    
 }
 
 void createFile(string fileName){

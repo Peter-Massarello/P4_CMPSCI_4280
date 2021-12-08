@@ -29,5 +29,9 @@ void generateM(Node* &tree, int variableCount);
 
 void generateR(Node* &tree, int variableCount);
 
+void generateLABEL(Node* &tree, int variableCount);
+
+void generateGOTO(Node* &tree, int variableCount);
+
 int checkIfLocal(string passedVariable);
 

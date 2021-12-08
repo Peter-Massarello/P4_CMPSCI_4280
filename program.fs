@@ -5,6 +5,8 @@ program
 start
     declare x = 1;
     declare y = 2;
+    label y;
     talk x;
     talk pp;
+    jump y;
 stop

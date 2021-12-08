@@ -2,5 +2,7 @@
 declare x = 5 ;
 program
 start
-  listen x ;
+  declare b = 2;
+  label b;
+  jump b;
 stop

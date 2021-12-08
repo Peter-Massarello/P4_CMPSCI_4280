@@ -31,7 +31,6 @@ void generate(Node* &tree, int variableCount){
     } else {
         branchToNextNonTerminal(tree, variableCount);
     }
-
 }
 
 void generateOUT(Node* &tree, int variableCount) {
@@ -66,8 +65,22 @@ void generateM(Node* &tree, int variableCount) {
 
 void generateR(Node* &tree, int variableCount) {
     cout << "found r" << endl;
+    generate(tree->child1, variableCount);
     outputFile << "LOAD " << tree->tk1->token << endl;
 }
+
+void generateLABEL(Node* &tree, int variableCount) {
+    cout << "found label" << endl;
+
+    outputFile << tree->tk1->token << ": NOOP" << endl;
+}
+
+void generateGOTO(Node* &tree, int variableCount) {
+    cout << "found goto" << endl;
+
+    outputFile << "BR " << tree->tk1->token << endl;
+}
+
 
 void pushLocalsToStack(Node* &tree, int &localVariableCount) {
     if(tree->tk1->token == "") return;
@@ -93,6 +106,8 @@ void branchToNextNonTerminal(Node* &tree, int variableCount) {
     else if (nodeType == "<A>") { generateA(tree, variableCount);}
     else if (nodeType == "<M>") { generateM(tree, variableCount);}
     else if (nodeType == "<R>") { generateR(tree, variableCount);}
+    else if (nodeType == "<LABEL>") { generateLABEL(tree, variableCount);}
+    else if (nodeType == "<GOTO>") { generateGOTO(tree, variableCount);}
     else {
         if (tree->child1 != NULL) branchToNextNonTerminal(tree->child1, variableCount);
         if (tree->child2 != NULL) branchToNextNonTerminal(tree->child2, variableCount);
@@ -125,7 +140,8 @@ int checkIfLocal(string passedVariable) {
             return -1;
         }
     }
-    
+
+    return -1;  
 }
 
 void createFile(string fileName){

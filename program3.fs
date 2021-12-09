@@ -1,9 +1,7 @@
-&& p2g3 : inner declaration of variable and an infinite loop with jump &&
 declare x = 5 ;
 program
 start
-   declare y = 7 ;
-   declare dog = 0;
-   listen x ;
-   jump dog ;
+    declare y = 5;
+    assign x = y + 1;
+    talk x;
 stop

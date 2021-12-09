@@ -35,3 +35,6 @@ void generateGOTO(Node* &tree, int variableCount);
 
 int checkIfLocal(string passedVariable);
 
+string generateTempVariable();
+
+

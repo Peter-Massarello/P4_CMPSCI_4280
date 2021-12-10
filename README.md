@@ -1,4 +1,4 @@
-# Project 4
+# Project 4 STORAGE=GLOBAL
 
  - Name:        Peter Massarello
  - Date:        December 10st 2021

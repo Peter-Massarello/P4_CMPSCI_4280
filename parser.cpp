@@ -36,7 +36,7 @@ Node* parse(vector<Token*> tokens){
     root = Program();
 
     tokenIndex = 0;
-    printPreorder(root, 0);
+    //printPreorder(root, 0);
 
     return root;
 }

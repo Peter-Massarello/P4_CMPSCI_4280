@@ -6,6 +6,7 @@ int globalOffsetForStack = 0;
 int tempVariableCount = 0;
 int labelCount = 0;
 string currentLabel = "";
+string tempFileName = "";
 
 void driver(Node* &tree, string fileName) {
     createFile(fileName);
@@ -30,13 +31,14 @@ void driver(Node* &tree, string fileName) {
 
     outputFile << "TEMP 0" << endl;
 
+    cout << ".asm file " << tempFileName << " created" << endl;
+
     outputFile.close();
 }
 
 void generate(Node* &tree, int variableCount){
     if (tree == NULL) return;
     if (tree->nodeType == "<BLOCK>") {
-        cout << "found block" << endl;
         int localVars = 0;
         pushLocalsToStack(tree->child1, localVars);
         generate(tree->child2, localVars);
@@ -122,7 +124,6 @@ void generateM(Node* &tree, int variableCount) {
 // ( <expr> ) | Identifier | Integer
 void generateR(Node* &tree, int variableCount) {
     if (tree->child1 == NULL) {
-        cout << "Token is  " << tree->tk1->token << endl;
         int isLocal = checkIfLocal(tree->tk1->token);
         if (isLocal != -1) {
             outputFile << "STACKR " << isLocal << endl;
@@ -170,7 +171,6 @@ void generateASSIGN(Node* &tree, int variableCount) {
 }
 
 void generateIF(Node* &tree, int variableCount) {
-    cout << "in if" << endl;
     generate(tree->child3, variableCount);
 
     string tempVar = newName("<VARS>");
@@ -203,7 +203,6 @@ void generateIF(Node* &tree, int variableCount) {
 
 
 void generateWHILE(Node* &tree, int variableCount) {
-    cout << "in while" << endl;
     string tempLabel = newName("<LABEL>");
     outputFile << tempLabel << ": NOOP" << endl;
     generate(tree->child3, variableCount);
@@ -236,7 +235,6 @@ void generateWHILE(Node* &tree, int variableCount) {
 void pushLocalsToStack(Node* &tree, int &localVariableCount) {
     if(tree->tk1->token == "") return;
 
-    cout << "PUSHING " << tree->tk1->token << endl;
     variableStack.push_back(tree->tk1->token);
     localVariableCount++;
 
@@ -302,27 +300,19 @@ void addGlobals(Node* &tree) {
 }
 
 int checkIfLocal(string passedVariable) {
-    cout << "printing stack with global offset " << globalOffsetForStack << endl;
-    for (int i = variableStack.size(); i > globalOffsetForStack; i--)
-    {
-        cout << "on stack " << variableStack.at(i - 1) << endl;
-    }
-
     for (int i = variableStack.size(); i > globalOffsetForStack; i--)
     {
         if (variableStack.at(i - 1) == passedVariable) {
-            cout << "found local" << variableStack.at(i - 1) << endl;
             return variableStack.size() - i;
         } 
     }
 
-    cout << "is a global " << passedVariable << endl;
     return -1;
 }
 
 void createFile(string fileName){
     size_t pos = fileName.find('.');
-    string tempFileName = fileName.substr(0, pos) + ".asm";
+    tempFileName = fileName.substr(0, pos) + ".asm";
     outputFile.open(tempFileName);
 
     // Tries to open file, catches error if cannot and exits

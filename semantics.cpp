@@ -7,13 +7,9 @@ int localVarsCount = 0;
 bool inGlobal = true;
 
 // Main driver function for the static semantics
-void staticSemantics(Node* &tree) {
-    cout << "Checking static semantics..." << endl;
-
+void staticSemantics(Node* &tree) { 
     buildStack(tree);
     clearStack();
-
-    cout << "Program clear!" << endl;
 }
 
 // clears entire stack for the end of the program

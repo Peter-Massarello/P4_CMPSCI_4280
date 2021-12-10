@@ -3,7 +3,9 @@
 ofstream outputFile;
 vector<string> variableStack;
 int globalOffsetForStack = 0;
-int tempVariableCount = 0;
+int tempVariableCount = 1;
+int labelCount = 1;
+string currentLabel = "";
 
 void driver(Node* &tree, string fileName) {
     createFile(fileName);
@@ -19,8 +21,13 @@ void driver(Node* &tree, string fileName) {
     }
 
     for (int i = 0; i < tempVariableCount; i++) {
-        outputFile << "TV" << i << " 0" << endl;
+        outputFile << "V" << i << " 0" << endl;
     }
+
+    for (int i = 0; i < labelCount; i++) {
+        outputFile << "L" << i << " 0" << endl;
+    }
+
     outputFile << "TEMP 0" << endl;
 
     outputFile.close();
@@ -33,12 +40,13 @@ void generate(Node* &tree, int variableCount){
         int localVars = 0;
         pushLocalsToStack(tree->child1, localVars);
         generate(tree->child2, localVars);
+        popLocals(localVars);
     } else {
         branchToNextNonTerminal(tree, variableCount);
     }
 }
 
-
+// talk <expr>
 void generateOUT(Node* &tree, int variableCount) {
     cout << "found out" << endl;
     generate(tree->child1, variableCount);
@@ -53,7 +61,7 @@ void generateEXPRESSION(Node* &tree, int variableCount) {
     if (tree->tk1->token != "") {
         cout << "found tk in expr" << endl;
         generate(tree->child2, variableCount);
-        string tempVar = generateTempVariable();
+        string tempVar = newName("<VARS>");
 
         outputFile << "STORE " << tempVar << endl;
 
@@ -73,7 +81,7 @@ void generateN(Node* &tree, int variableCount) {
     if (tree->tk1->token != "") {
         cout << "found tk in N" << endl;
         generate(tree->child2, variableCount);
-        string tempVar = generateTempVariable();
+        string tempVar = newName("<VARS>");
 
         outputFile << "STORE " << tempVar << endl;
 
@@ -98,7 +106,7 @@ void generateA(Node* &tree, int variableCount) {
     if (tree->tk1->token != "") {
         cout << "found tk in A" << endl;
         generate(tree->child2, variableCount);
-        string tempVar = generateTempVariable();
+        string tempVar = newName("<VARS>");
 
         outputFile << "STORE " << tempVar << endl;
         generate(tree->child1, variableCount);
@@ -137,16 +145,35 @@ void generateR(Node* &tree, int variableCount) {
     }
 }
 
+void generateIN(Node* &tree, int variableCount) {
+    cout << "found r" << endl;
+    if (tree->child1 == NULL) {
+        int isLocal = checkIfLocal(tree->tk1->token);
+        if (isLocal != -1) {
+            string tempVar = newName("<VARS>");
+            outputFile << "READ " << tempVar << endl;
+            outputFile << "LOAD " << tempVar << endl;
+            outputFile << "STACKR " << isLocal << endl;
+        } else {
+            outputFile << "LOAD " << tree->tk1->token << endl;
+        }
+    } else {
+        generate(tree->child1, variableCount);
+    }
+}
+
 void generateLABEL(Node* &tree, int variableCount) {
     cout << "found label" << endl;
-
-    outputFile << tree->tk1->token << ": NOOP" << endl;
+    string label = newName("<LABEL>");
+    outputFile << label << ": NOOP" << endl;
+    generate(tree->child1, variableCount);
 }
 
 void generateGOTO(Node* &tree, int variableCount) {
     cout << "found goto" << endl;
-
-    outputFile << "BR " << tree->tk1->token << endl;
+    string label = newName("<LABEL>");
+    generate(tree->child1, variableCount);
+    outputFile << "BR " << label << endl;
 }
 
 void generateASSIGN(Node* &tree, int variableCount) {
@@ -176,8 +203,27 @@ void pushLocalsToStack(Node* &tree, int &localVariableCount) {
     if (tree->child1 != NULL) pushLocalsToStack(tree->child1, localVariableCount);
 }
 
+void popLocals(int variableCount) {
+    for (int i = 0; i < variableCount; i++) {
+        outputFile << "POP" << endl;
+    }
+}
+
+string newName(string type) {
+    if (type == "<VARS>") {
+        string tempVariableString = "V" + to_string(tempVariableCount - 1);
+        tempVariableCount++;
+        return tempVariableString;
+    } else {
+        string tempVariableString = "L" + to_string(labelCount - 1);
+        labelCount++;
+        return tempVariableString;
+    }
+}
+
 void branchToNextNonTerminal(Node* &tree, int variableCount) {
     string nodeType = tree->nodeType;
+    cout << "NODE TYPE IS " << nodeType << endl;
     
     if (nodeType == "<ASSIGN>") { generateASSIGN(tree, variableCount);}
     else if (nodeType == "<OUT>") { generateOUT(tree, variableCount);}
@@ -188,12 +234,13 @@ void branchToNextNonTerminal(Node* &tree, int variableCount) {
     else if (nodeType == "<R>") { generateR(tree, variableCount);}
     else if (nodeType == "<LABEL>") { generateLABEL(tree, variableCount);}
     else if (nodeType == "<GOTO>") { generateGOTO(tree, variableCount);}
+    else if (nodeType == "<IN>") { generateIN(tree, variableCount);}
     else {
-        if (tree->child1 != NULL) branchToNextNonTerminal(tree->child1, variableCount);
-        if (tree->child2 != NULL) branchToNextNonTerminal(tree->child2, variableCount);
-        if (tree->child3 != NULL) branchToNextNonTerminal(tree->child3, variableCount);
-        if (tree->child4 != NULL) branchToNextNonTerminal(tree->child4, variableCount);
-        if (tree->child5 != NULL) branchToNextNonTerminal(tree->child5, variableCount);
+        if (tree->child1 != NULL) generate(tree->child1, variableCount);
+        if (tree->child2 != NULL) generate(tree->child2, variableCount);
+        if (tree->child3 != NULL) generate(tree->child3, variableCount);
+        if (tree->child4 != NULL) generate(tree->child4, variableCount);
+        if (tree->child5 != NULL) generate(tree->child5, variableCount);
     }
 
 }
@@ -225,8 +272,15 @@ int checkIfLocal(string passedVariable) {
 }
 
 string generateTempVariable() {
-    string tempVariableString = "TV" + to_string(tempVariableCount);
+    string tempVariableString = "V" + to_string(tempVariableCount);
     tempVariableCount++;
+    return tempVariableString;
+}
+
+string generateTempLabel() {
+    string tempVariableString = "L" + to_string(labelCount);
+    labelCount++;
+    currentLabel = tempVariableString;
     return tempVariableString;
 }
 

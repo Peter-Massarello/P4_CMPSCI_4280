@@ -33,8 +33,15 @@ void generateLABEL(Node* &tree, int variableCount);
 
 void generateGOTO(Node* &tree, int variableCount);
 
+void generateIN(Node* &tree, int vairableCount);
+
 int checkIfLocal(string passedVariable);
 
 string generateTempVariable();
 
+string generateTempLabel();
+
+string newName(string type);
+
+void popLocals(int variableCount);
 

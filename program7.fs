@@ -4,12 +4,11 @@ declare a = 1;
 declare y = 2;
 program
 start
-   start
-      declare b = 7 ;
-      declare x = 8 ;
-      label x ;
-      listen b ;
-   stop
+   declare b = 7 ;
+   declare x = 8 ;
+   label x ;
+   listen b ;
+   jump x ;
    start
       start
          declare x = 0 ;

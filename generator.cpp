@@ -3,8 +3,8 @@
 ofstream outputFile;
 vector<string> variableStack;
 int globalOffsetForStack = 0;
-int tempVariableCount = 1;
-int labelCount = 1;
+int tempVariableCount = 0;
+int labelCount = 0;
 string currentLabel = "";
 
 void driver(Node* &tree, string fileName) {
@@ -170,6 +170,38 @@ void generateASSIGN(Node* &tree, int variableCount) {
     }
 }
 
+void generateIF(Node* &tree, int variableCount) {
+    cout << "in if" << endl;
+    generate(tree->child3, variableCount);
+
+    string tempVar = newName("<VARS>");
+    outputFile << "STORE " << tempVar << endl;
+
+    generate(tree->child1, variableCount);
+    outputFile << "SUB " << tempVar << endl;
+
+    string tempLabel = newName("<LABEL>");
+
+    if (tree->child2->tk1->token == "{") {
+        outputFile << "BRZERO " << tempLabel << endl;
+    } else if (tree->child2->tk1->token == ">") {
+        outputFile << "BRNEG " << tempLabel << endl;
+    } else if (tree->child2->tk1->token == "<") {
+        outputFile << "BRPOS " << tempLabel << endl;
+    } else if (tree->child2->tk1->token == "==") {
+        outputFile << "BRPOS " << tempLabel << endl;
+        outputFile << "BRNEG " << tempLabel << endl;
+    }
+
+    generate(tree->child4, variableCount);
+    outputFile << tempLabel <<  ": NOOP" << endl;
+
+    string tempLabel2 = newName("<LABEL>");
+    outputFile << "BR " << tempLabel2 << endl;
+    generate(tree->child5, variableCount);
+    outputFile << tempLabel <<  ": NOOP" << endl;
+}
+
 
 void pushLocalsToStack(Node* &tree, int &localVariableCount) {
     if(tree->tk1->token == "") return;
@@ -193,11 +225,11 @@ void popLocals(int variableCount) {
 
 string newName(string type) {
     if (type == "<VARS>") {
-        string tempVariableString = "V" + to_string(tempVariableCount - 1);
+        string tempVariableString = "V" + to_string(tempVariableCount);
         tempVariableCount++;
         return tempVariableString;
     } else {
-        string tempVariableString = "L" + to_string(labelCount - 1);
+        string tempVariableString = "L" + to_string(labelCount);
         labelCount++;
         return tempVariableString;
     }
@@ -216,6 +248,7 @@ void branchToNextNonTerminal(Node* &tree, int variableCount) {
     else if (nodeType == "<LABEL>") { generateLABEL(tree, variableCount);}
     else if (nodeType == "<GOTO>") { generateGOTO(tree, variableCount);}
     else if (nodeType == "<IN>") { generateIN(tree, variableCount);}
+    else if (nodeType == "<IF>") { generateIF(tree, variableCount);}
     else {
         if (tree->child1 != NULL) generate(tree->child1, variableCount);
         if (tree->child2 != NULL) generate(tree->child2, variableCount);
@@ -254,19 +287,6 @@ int checkIfLocal(string passedVariable) {
 
     cout << "is a global " << passedVariable << endl;
     return -1;
-}
-
-string generateTempVariable() {
-    string tempVariableString = "V" + to_string(tempVariableCount);
-    tempVariableCount++;
-    return tempVariableString;
-}
-
-string generateTempLabel() {
-    string tempVariableString = "L" + to_string(labelCount);
-    labelCount++;
-    currentLabel = tempVariableString;
-    return tempVariableString;
 }
 
 void createFile(string fileName){

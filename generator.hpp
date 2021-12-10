@@ -35,11 +35,9 @@ void generateGOTO(Node* &tree, int variableCount);
 
 void generateIN(Node* &tree, int vairableCount);
 
+void generateIF(Node* &tree, int variableCount);
+
 int checkIfLocal(string passedVariable);
-
-string generateTempVariable();
-
-string generateTempLabel();
 
 string newName(string type);
 

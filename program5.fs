@@ -4,7 +4,6 @@ program
 start
    while [ x == 0 ]
    start
-      listen x ;
       talk x ;
    stop ;
 stop

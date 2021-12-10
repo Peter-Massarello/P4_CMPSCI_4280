@@ -37,6 +37,8 @@ void generateIN(Node* &tree, int vairableCount);
 
 void generateIF(Node* &tree, int variableCount);
 
+void generateWHILE(Node* &tree, int variableCount);
+
 int checkIfLocal(string passedVariable);
 
 string newName(string type);

@@ -6,10 +6,10 @@ start
    start
       declare y = 2;
       declare z = 9;
-      listen y ;
-      listen a;
+      talk y ;
+      talk a;
       assign z = y;
    stop ;
-   listen a;
+   talk a;
    talk y;
 stop

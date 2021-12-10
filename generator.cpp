@@ -151,7 +151,6 @@ void generateIN(Node* &tree, int variableCount) {
 }
 
 void generateLABEL(Node* &tree, int variableCount) {
-    cout << "in label" << endl;
     outputFile << tree->tk1->token << ": NOOP" << endl;
 }
 
@@ -203,6 +202,37 @@ void generateIF(Node* &tree, int variableCount) {
 }
 
 
+void generateWHILE(Node* &tree, int variableCount) {
+    cout << "in while" << endl;
+    string tempLabel = newName("<LABEL>");
+    outputFile << tempLabel << ": NOOP" << endl;
+    generate(tree->child3, variableCount);
+
+    string tempVar = newName("<VARS>");
+    outputFile << "STORE " << tempVar << endl;
+
+    generate(tree->child1, variableCount);
+    outputFile << "SUB " << tempVar << endl;
+
+    string tempLabel2 = newName("<LABEL>");
+
+    if (tree->child2->tk1->token == "{") {
+        outputFile << "BRZERO " << tempLabel << endl;
+    } else if (tree->child2->tk1->token == ">") {
+        outputFile << "BRNEG " << tempLabel << endl;
+    } else if (tree->child2->tk1->token == "<") {
+        outputFile << "BRPOS " << tempLabel << endl;
+    } else if (tree->child2->tk1->token == "==") {
+        outputFile << "BRPOS " << tempLabel << endl;
+        outputFile << "BRNEG " << tempLabel << endl;
+    }
+
+    generate(tree->child4, variableCount);
+    outputFile << "BR " << tempLabel << endl;
+    outputFile << tempLabel2 <<  ": NOOP" << endl;
+}
+
+
 void pushLocalsToStack(Node* &tree, int &localVariableCount) {
     if(tree->tk1->token == "") return;
 
@@ -249,6 +279,7 @@ void branchToNextNonTerminal(Node* &tree, int variableCount) {
     else if (nodeType == "<GOTO>") { generateGOTO(tree, variableCount);}
     else if (nodeType == "<IN>") { generateIN(tree, variableCount);}
     else if (nodeType == "<IF>") { generateIF(tree, variableCount);}
+    else if (nodeType == "<LOOP>") { generateWHILE(tree, variableCount);}
     else {
         if (tree->child1 != NULL) generate(tree->child1, variableCount);
         if (tree->child2 != NULL) generate(tree->child2, variableCount);

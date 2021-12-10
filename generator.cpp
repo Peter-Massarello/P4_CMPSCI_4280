@@ -152,15 +152,11 @@ void generateIN(Node* &tree, int variableCount) {
 
 void generateLABEL(Node* &tree, int variableCount) {
     cout << "in label" << endl;
-    string label = newName("<LABEL>");
-    outputFile << label << ": NOOP" << endl;
-    generate(tree->child1, variableCount);
+    outputFile << tree->tk1->token << ": NOOP" << endl;
 }
 
 void generateGOTO(Node* &tree, int variableCount) {
-    string label = newName("<LABEL>");
-    generate(tree->child1, variableCount);
-    outputFile << "BR " << label << endl;
+    outputFile << "BR " << tree->tk1->token << endl;
 }
 
 void generateASSIGN(Node* &tree, int variableCount) {

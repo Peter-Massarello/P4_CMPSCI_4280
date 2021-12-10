@@ -48,7 +48,6 @@ void generate(Node* &tree, int variableCount){
 
 // talk <expr>
 void generateOUT(Node* &tree, int variableCount) {
-    cout << "found out" << endl;
     generate(tree->child1, variableCount);
 
     outputFile << "STORE TEMP" << endl;
@@ -57,9 +56,7 @@ void generateOUT(Node* &tree, int variableCount) {
 
 // <N> + <expr> | <N>
 void generateEXPRESSION(Node* &tree, int variableCount) {
-    cout << "found Expr" << endl;
     if (tree->tk1->token != "") {
-        cout << "found tk in expr" << endl;
         generate(tree->child2, variableCount);
         string tempVar = newName("<VARS>");
 
@@ -70,16 +67,13 @@ void generateEXPRESSION(Node* &tree, int variableCount) {
             outputFile << "ADD " << tempVar << endl;
         }
     } else {
-        cout << "did not find tk in expr" << endl;
         generate(tree->child1, variableCount);
     }
 }
 
 // <A> / <N> | <A> * <N> | <A>
 void generateN(Node* &tree, int variableCount) {
-    cout << "found N" << endl;
     if (tree->tk1->token != "") {
-        cout << "found tk in N" << endl;
         generate(tree->child2, variableCount);
         string tempVar = newName("<VARS>");
 
@@ -94,7 +88,6 @@ void generateN(Node* &tree, int variableCount) {
         }
         
     } else {
-        cout << "did not find tk in N" << endl;
         generate(tree->child1, variableCount);
     }
 
@@ -102,9 +95,7 @@ void generateN(Node* &tree, int variableCount) {
 
 //<M> - <A> | <M>
 void generateA(Node* &tree, int variableCount) {
-    cout << "found A" << endl;
     if (tree->tk1->token != "") {
-        cout << "found tk in A" << endl;
         generate(tree->child2, variableCount);
         string tempVar = newName("<VARS>");
 
@@ -115,14 +106,12 @@ void generateA(Node* &tree, int variableCount) {
             outputFile << "SUB " << tempVar << endl;
         }
     } else {
-        cout << "did not find tk in A" << endl;
         generate(tree->child1, variableCount);
     }
 }
 
 // .<M> | <R>
 void generateM(Node* &tree, int variableCount) {
-    cout << "found M" << endl;
     generate(tree->child1, variableCount);
 
     if (tree->child1->tk1->tokenType == DOTtk) {
@@ -132,8 +121,8 @@ void generateM(Node* &tree, int variableCount) {
 
 // ( <expr> ) | Identifier | Integer
 void generateR(Node* &tree, int variableCount) {
-    cout << "found r" << endl;
     if (tree->child1 == NULL) {
+        cout << "Token is  " << tree->tk1->token << endl;
         int isLocal = checkIfLocal(tree->tk1->token);
         if (isLocal != -1) {
             outputFile << "STACKR " << isLocal << endl;
@@ -146,7 +135,6 @@ void generateR(Node* &tree, int variableCount) {
 }
 
 void generateIN(Node* &tree, int variableCount) {
-    cout << "found r" << endl;
     if (tree->child1 == NULL) {
         int isLocal = checkIfLocal(tree->tk1->token);
         if (isLocal != -1) {
@@ -163,21 +151,19 @@ void generateIN(Node* &tree, int variableCount) {
 }
 
 void generateLABEL(Node* &tree, int variableCount) {
-    cout << "found label" << endl;
+    cout << "in label" << endl;
     string label = newName("<LABEL>");
     outputFile << label << ": NOOP" << endl;
     generate(tree->child1, variableCount);
 }
 
 void generateGOTO(Node* &tree, int variableCount) {
-    cout << "found goto" << endl;
     string label = newName("<LABEL>");
     generate(tree->child1, variableCount);
     outputFile << "BR " << label << endl;
 }
 
 void generateASSIGN(Node* &tree, int variableCount) {
-    cout << "found assign" << endl;
     generate(tree->child1, variableCount);
 
     int isLocal = checkIfLocal(tree->tk1->token);
@@ -223,7 +209,6 @@ string newName(string type) {
 
 void branchToNextNonTerminal(Node* &tree, int variableCount) {
     string nodeType = tree->nodeType;
-    cout << "NODE TYPE IS " << nodeType << endl;
     
     if (nodeType == "<ASSIGN>") { generateASSIGN(tree, variableCount);}
     else if (nodeType == "<OUT>") { generateOUT(tree, variableCount);}
@@ -257,18 +242,22 @@ void addGlobals(Node* &tree) {
 }
 
 int checkIfLocal(string passedVariable) {
+    cout << "printing stack with global offset " << globalOffsetForStack << endl;
+    for (int i = variableStack.size(); i > globalOffsetForStack; i--)
+    {
+        cout << "on stack " << variableStack.at(i - 1) << endl;
+    }
+
     for (int i = variableStack.size(); i > globalOffsetForStack; i--)
     {
         if (variableStack.at(i - 1) == passedVariable) {
             cout << "found local" << variableStack.at(i - 1) << endl;
             return variableStack.size() - i;
-        } else {
-            cout << "is a global" << endl;
-            return -1;
-        }
+        } 
     }
 
-    return -1;  
+    cout << "is a global " << passedVariable << endl;
+    return -1;
 }
 
 string generateTempVariable() {

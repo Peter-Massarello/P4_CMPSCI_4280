@@ -6,13 +6,14 @@ program
 start
    declare b = 7 ;
    declare x = 8 ;
-   label x ;
-   listen b ;
-   jump x ;
+   talk x;
    start
       start
          declare x = 0 ;
          declare a = 2;
+         label a;
+         talk x;
+         talk b;
          jump a ;
       stop
    stop

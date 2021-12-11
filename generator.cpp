@@ -193,13 +193,12 @@ void generateIF(Node* &tree, int variableCount) {
     }
 
     generate(tree->child4, variableCount);
-    cout << "printing " << tempLabel << endl;
-    outputFile << tempLabel <<  ": NOOP" << endl;
 
     string tempLabel2 = newName("<LABEL>");
     outputFile << "BR " << tempLabel2 << endl;
+
+    outputFile << tempLabel <<  ": NOOP" << endl;
     generate(tree->child5, variableCount);
-    cout << "printing " << tempLabel2 << endl;
     outputFile << tempLabel2 <<  ": NOOP" << endl;
 }
 

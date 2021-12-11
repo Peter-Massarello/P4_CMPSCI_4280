@@ -1,10 +1,17 @@
-&& p2g1, smallest program and a good idea to make variants of this with each statement &&
-declare x = 5 ;
+declare x = 0;
+declare y = 2;
+declare z = 0 ;
 program
 start
-    declare x = 1;
-    declare y = 2;
-    label y;
-    talk x;
-    jump y;
+   listen x ;
+   while [ y < x ] 
+   start
+      assign z = x / y ;
+      assign z = x - ( z * y ) ;
+      if [ z == 0 ] then
+      start
+         talk y ;
+      stop ;
+      assign y = y + 1 ;
+   stop ;
 stop

@@ -144,7 +144,7 @@ void generateIN(Node* &tree, int variableCount) {
             outputFile << "LOAD " << tempVar << endl;
             outputFile << "STACKR " << isLocal << endl;
         } else {
-            outputFile << "LOAD " << tree->tk1->token << endl;
+            outputFile << "READ " << tree->tk1->token << endl;
         }
     } else {
         generate(tree->child1, variableCount);
@@ -184,21 +184,23 @@ void generateIF(Node* &tree, int variableCount) {
     if (tree->child2->tk1->token == "{") {
         outputFile << "BRZERO " << tempLabel << endl;
     } else if (tree->child2->tk1->token == ">") {
-        outputFile << "BRNEG " << tempLabel << endl;
+        outputFile << "BRZNEG " << tempLabel << endl;
     } else if (tree->child2->tk1->token == "<") {
-        outputFile << "BRPOS " << tempLabel << endl;
+        outputFile << "BRZPOS " << tempLabel << endl;
     } else if (tree->child2->tk1->token == "==") {
         outputFile << "BRPOS " << tempLabel << endl;
         outputFile << "BRNEG " << tempLabel << endl;
     }
 
     generate(tree->child4, variableCount);
+    cout << "printing " << tempLabel << endl;
     outputFile << tempLabel <<  ": NOOP" << endl;
 
     string tempLabel2 = newName("<LABEL>");
     outputFile << "BR " << tempLabel2 << endl;
     generate(tree->child5, variableCount);
-    outputFile << tempLabel <<  ": NOOP" << endl;
+    cout << "printing " << tempLabel2 << endl;
+    outputFile << tempLabel2 <<  ": NOOP" << endl;
 }
 
 
@@ -216,14 +218,14 @@ void generateWHILE(Node* &tree, int variableCount) {
     string tempLabel2 = newName("<LABEL>");
 
     if (tree->child2->tk1->token == "{") {
-        outputFile << "BRZERO " << tempLabel << endl;
+        outputFile << "BRZERO " << tempLabel2 << endl;
     } else if (tree->child2->tk1->token == ">") {
-        outputFile << "BRNEG " << tempLabel << endl;
+        outputFile << "BRZNEG " << tempLabel2 << endl;
     } else if (tree->child2->tk1->token == "<") {
-        outputFile << "BRPOS " << tempLabel << endl;
+        outputFile << "BRZPOS " << tempLabel2 << endl;
     } else if (tree->child2->tk1->token == "==") {
-        outputFile << "BRPOS " << tempLabel << endl;
-        outputFile << "BRNEG " << tempLabel << endl;
+        outputFile << "BRPOS " << tempLabel2 << endl;
+        outputFile << "BRNEG " << tempLabel2 << endl;
     }
 
     generate(tree->child4, variableCount);

@@ -2,10 +2,9 @@
 declare x = 0 ;
 program
 start
-   while [ x == 0 ]
+   while [ x < 5 ]
    start
       talk x ;
+      assign x = x + 1 ;
    stop ;
 stop
-
-&&
